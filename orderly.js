@@ -33,6 +33,14 @@
     }
   }
 
+  function isTouchDevice () {
+    try {
+      return window.hasOwnProperty('ontouchstart');
+    } catch (e) {
+      return false;
+    }
+  }
+
   Orderly = function (el, options) {
     this.settings = $.extend({}, defaultOptions, options);
     this.$list = $(el).first();
@@ -42,18 +50,30 @@
   };
 
   Orderly.prototype.enable = function() {
-    this.onMouseDown = __bind(this.onMouseDown, this);
-    this.onMouseMove = __bind(this.onMouseMove, this);
-    this.onMouseUp   = __bind(this.onMouseUp, this);
+    if (isTouchDevice()) {
+      this.onTouchStart = __bind(this.onTouchStart, this);
+      this.onTouchMove = __bind(this.onTouchMove, this);
+      this.onTouchEnd   = __bind(this.onTouchEnd, this);
+      this.$list.on('touchstart', [this.settings.itemSelector, this.settings.handleSelector].join(' '), this.onTouchStart);
+    } else {
+      this.onMouseDown = __bind(this.onMouseDown, this);
+      this.onMouseMove = __bind(this.onMouseMove, this);
+      this.onMouseUp   = __bind(this.onMouseUp, this);
+      this.$list.on('mousedown', [this.settings.itemSelector, this.settings.handleSelector].join(' '), this.onMouseDown);
+    }
 
     this.setItems();
     this.setItemHeight();
-    this.$list.on('mousedown', [this.settings.itemSelector, this.settings.handleSelector].join(' '), this.onMouseDown);
     this._enabled = true;
   };
 
   Orderly.prototype.disable = function() {
-    this.$list.off('mousedown', [this.settings.itemSelector, this.settings.handleSelector].join(' '), this.onMouseDown);
+    if (isTouchDevice()) {
+      this.$list.off('touchstart', [this.settings.itemSelector, this.settings.handleSelector].join(' '), this.onTouchStart);
+    } else {
+      this.$list.off('mousedown', [this.settings.itemSelector, this.settings.handleSelector].join(' '), this.onMouseDown);
+    }
+
     this.$items = null;
     this.height = 0;
     this._enabled = false;
@@ -69,25 +89,7 @@
     delete this.settings;
   };
 
-  Orderly.prototype.setItemHeight = function() {
-    if (this.$items.length > 1) {
-      return this.height = this.$items.get(1).offsetTop - this.$items.get(0).offsetTop;
-    } else {
-      return this.height = 0;
-    }
-  };
-
-  Orderly.prototype.setItems = function() {
-    this.$items = this.$list.find(this.settings.itemSelector);
-  };
-
   Orderly.prototype.onMouseDown = function(event) {
-    if (this.settings.handleSelector) {
-      this.$target = $(event.target).parent(this.settings.itemSelector);
-    } else {
-      this.$target = $(event.target);
-    }
-
     $(document).on({
       mousemove: this.onMouseMove,
       mouseup: this.onMouseUp
@@ -103,20 +105,68 @@
     this.move(event.pageX - this.x1, event.pageY - this.y1);
   };
 
-  Orderly.prototype.onMouseUp = function(e) {
-    if (!this.$target) return;
+  Orderly.prototype.onMouseUp = function() {
     $(document).off({
       mousemove: this.onMouseMove,
       mouseup: this.onMouseUp
     });
     this.end();
-    delete this.$target;
     delete this.x1;
     delete this.y1;
   };
 
+  Orderly.prototype.onTouchStart = function(event) {
+    // TODO properly implement this method
+    $(document).on({
+      touchmove: this.onTouchMove,
+      touchend: this.onTouchEnd
+    });
+
+    this.x1 = event.pageX;
+    this.y1 = event.pageY;
+    this.start();
+    return false;
+  };
+
+  Orderly.prototype.onTouchMove = function(event) {
+    // TODO properly implement this method
+    this.move(event.pageX - this.x1, event.pageY - this.y1);
+  };
+
+  Orderly.prototype.onTouchEnd = function() {
+    // TODO properly implement this method
+    $(document).off({
+      touchmove: this.onTouchMove,
+      touchend: this.onTouchEnd
+    });
+    this.end();
+    delete this.x1;
+    delete this.y1;
+  };
+
+  Orderly.prototype.setItemHeight = function() {
+    if (this.$items.length > 1) {
+      return this.height = this.$items.get(1).offsetTop - this.$items.get(0).offsetTop;
+    } else {
+      return this.height = 0;
+    }
+  };
+
+  Orderly.prototype.setItems = function() {
+    this.$items = this.$list.find(this.settings.itemSelector);
+  };
+
+  Orderly.prototype.setTarget = function() {
+    if (this.settings.handleSelector) {
+      this.$target = $(event.target).parent(this.settings.itemSelector);
+    } else {
+      this.$target = $(event.target);
+    }
+  };
+
   Orderly.prototype.start = function() {
     this.setItems();
+    this.setTarget();
     toggleSortingStyles.call(this, true);
     this.ti = this.$items.index(this.$target);
   };
@@ -164,7 +214,8 @@
     }
     if (ci !== this.ti) $(this.$items.get(ci))[func](this.$target);
     delete this.di;
-    return delete this.ti;
+    delete this.ti;
+    delete this.$target;
   };
 
   if (typeof module !== 'undefined' && module.exports) {

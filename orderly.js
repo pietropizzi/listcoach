@@ -95,14 +95,14 @@
       mouseup: this.onMouseUp
     });
 
-    this.x1 = event.pageX;
-    this.y1 = event.pageY;
+    this.startX = event.pageX;
+    this.startY = event.pageY;
     this.start();
     return false;
   };
 
   Orderly.prototype.onMouseMove = function(event) {
-    this.move(event.pageX - this.x1, event.pageY - this.y1);
+    this.move(event.pageX - this.startX, event.pageY - this.startY);
   };
 
   Orderly.prototype.onMouseUp = function() {
@@ -111,37 +111,37 @@
       mouseup: this.onMouseUp
     });
     this.end();
-    delete this.x1;
-    delete this.y1;
+    delete this.startX;
+    delete this.startY;
   };
 
   Orderly.prototype.onTouchStart = function(event) {
-    // TODO properly implement this method
+    var changedTouch = event.originalEvent.changedTouches[0];
+
     $(event.target).on({
       touchmove: this.onTouchMove,
       touchend: this.onTouchEnd
     });
 
-    this.x1 = event.originalEvent.changedTouches[0].pageX;
-    this.y1 = event.originalEvent.changedTouches[0].pageY;
+    this.startX = changedTouch.pageX;
+    this.startY = changedTouch.pageY;
     this.start();
     return false;
   };
 
   Orderly.prototype.onTouchMove = function(event) {
-    // TODO properly implement this method
-    this.move(event.originalEvent.changedTouches[0].pageX - this.x1, event.originalEvent.changedTouches[0].pageY - this.y1);
+    var changedTouch = event.originalEvent.changedTouches[0];
+    this.move(changedTouch.pageX - this.startX, changedTouch.pageY - this.startY);
   };
 
   Orderly.prototype.onTouchEnd = function(event) {
-    // TODO properly implement this method
     $(event.target).off({
       touchmove: this.onTouchMove,
       touchend: this.onTouchEnd
     });
     this.end();
-    delete this.x1;
-    delete this.y1;
+    delete this.startX;
+    delete this.startY;
   };
 
   Orderly.prototype.setItemHeight = function() {

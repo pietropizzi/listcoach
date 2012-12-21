@@ -117,25 +117,25 @@
 
   Orderly.prototype.onTouchStart = function(event) {
     // TODO properly implement this method
-    $(document).on({
+    $(event.target).on({
       touchmove: this.onTouchMove,
       touchend: this.onTouchEnd
     });
 
-    this.x1 = event.pageX;
-    this.y1 = event.pageY;
+    this.x1 = event.originalEvent.changedTouches[0].pageX;
+    this.y1 = event.originalEvent.changedTouches[0].pageY;
     this.start();
     return false;
   };
 
   Orderly.prototype.onTouchMove = function(event) {
     // TODO properly implement this method
-    this.move(event.pageX - this.x1, event.pageY - this.y1);
+    this.move(event.originalEvent.changedTouches[0].pageX - this.x1, event.originalEvent.changedTouches[0].pageY - this.y1);
   };
 
-  Orderly.prototype.onTouchEnd = function() {
+  Orderly.prototype.onTouchEnd = function(event) {
     // TODO properly implement this method
-    $(document).off({
+    $(event.target).off({
       touchmove: this.onTouchMove,
       touchend: this.onTouchEnd
     });

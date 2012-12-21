@@ -1,32 +1,47 @@
 (function() {
   var Orderly,
       global,
-      __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
       defaultOptions = {
         itemSelector: 'li',
-        triggerSelector: '',
-        browserPrefix: '-webkit-',
-        transitionDuration: '0.3'
+        handleSelector: ''
       };
 
-  Orderly = function (el, options) {
-    this.onMouseUp = __bind(this.onMouseUp, this);
-    this.onMouseMove = __bind(this.onMouseMove, this);
-    this.onMouseDown = __bind(this.onMouseDown, this);
 
-    $.extend(this, defaultOptions, options);
+  function __bind (fn, me){ return function(){ return fn.apply(me, arguments); }; }
+
+  function toggleSortingStyles (toggle) {
+    if (toggle) {
+      this.$items
+        .css('position', 'relative')
+        .not(this.$target)
+          .css('-webkit-transition', 'top .3s');
+
+      this.$target.css('z-index', 1);
+    } else {
+      this.$items
+        .css('-webkit-transition', '')
+        .css({
+          position: '',
+          top: '',
+          left: '',
+          'z-index': ''
+        });
+    }
+  }
+
+  Orderly = function (el, options) {
+    this.onMouseDown = __bind(this.onMouseDown, this);
+    this.onMouseMove = __bind(this.onMouseMove, this);
+    this.onMouseUp   = __bind(this.onMouseUp, this);
+
+    this.settings = $.extend({}, defaultOptions, options);
 
     this.$list = $(el).first();
-
-    $(document).bind({
-      mousemove: this.onMouseMove,
-      mouseup: this.onMouseUp
-    });
-    this.$list.delegate("" + this.itemSelector + " " + this.triggerSelector, 'mousedown', this.onMouseDown);
+    this.$list.on('mousedown', [this.settings.itemSelector, this.settings.handleSelector].join(' '), this.onMouseDown);
   };
 
   Orderly.prototype.refreshItems = function() {
-    this.$items = this.$list.find(this.itemSelector);
+    this.$items = this.$list.find(this.settings.itemSelector);
     if (this.$items.length > 1) {
       return this.height = this.$items.get(1).offsetTop - this.$items.get(0).offsetTop;
     } else {
@@ -34,38 +49,44 @@
     }
   };
 
-  Orderly.prototype.onMouseDown = function(e) {
-    if (this.triggerSelector) {
-      this.$target = $(e.target).parent(this.itemSelector);
+  Orderly.prototype.onMouseDown = function(event) {
+    if (this.settings.handleSelector) {
+      this.$target = $(event.target).parent(this.settings.itemSelector);
     } else {
-      this.$target = $(e.target);
+      this.$target = $(event.target);
     }
-    this.x1 = e.pageX;
-    this.y1 = e.pageY;
+
+    $(document).on({
+      mousemove: this.onMouseMove,
+      mouseup: this.onMouseUp
+    });
+
+    this.x1 = event.pageX;
+    this.y1 = event.pageY;
     this.start();
-    e.preventDefault();
-    return e.stopPropagation();
+    return false;
   };
 
-  Orderly.prototype.onMouseMove = function(e) {
-    if (!this.$target) return;
-    return this.move(e.pageX - this.x1, e.pageY - this.y1);
+  Orderly.prototype.onMouseMove = function(event) {
+    this.move(event.pageX - this.x1, event.pageY - this.y1);
   };
 
   Orderly.prototype.onMouseUp = function(e) {
     if (!this.$target) return;
+    $(document).off({
+      mousemove: this.onMouseMove,
+      mouseup: this.onMouseUp
+    });
     this.end();
     delete this.$target;
     delete this.x1;
-    return delete this.y1;
+    delete this.y1;
   };
 
   Orderly.prototype.start = function() {
     this.refreshItems();
-    this.$items.css('position', 'relative');
-    this.$items.not(this.$target).css("" + this.browserPrefix + "transition", "top " + this.transitionDuration + "s");
-    this.$target.css('z-index', 1);
-    return this.ti = this.$items.index(this.$target);
+    toggleSortingStyles.call(this, true);
+    this.ti = this.$items.index(this.$target);
   };
 
   Orderly.prototype.move = function(dx, dy) {
@@ -79,7 +100,8 @@
     if (di === this.di) return;
     this.di = di;
     ci = this.ti + this.di;
-    return this.$items.each(function(i, item) {
+
+    this.$items.each(function(i, item) {
       var top;
       if (i === _this.ti) return;
       switch (true) {
@@ -92,18 +114,13 @@
         default:
           top = '';
       }
-      return $(item).css('top', top);
+      $(item).css('top', top);
     });
   };
 
   Orderly.prototype.end = function() {
     var ci, func, maxi;
-    this.$items.css("" + this.browserPrefix + "transition", '').css({
-      position: '',
-      top: '',
-      left: '',
-      'z-index': ''
-    });
+    toggleSortingStyles.call(this, false);
     ci = this.ti + this.di;
     maxi = this.$items.length - 1;
     if (ci < 0) ci = 0;

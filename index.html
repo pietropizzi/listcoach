@@ -1,32 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Orderly</title>
+	<style>
+		ul#list {
+			list-style: none;
+			width: 400px;
+			padding: 0;
+		}
+		ul#list li {
+			margin: 10px;
+			padding: 5px;
+			border: 1px solid #ccc;
+			background-color: #eee;
+		}
+	</style>
+</head>
+<body>
+	<script src="http://code.jquery.com/jquery-1.7.min.js"></script>
+	<script src="orderly.js"></script>
 
-<script src="http://code.jquery.com/jquery-1.7.min.js"></script>
-<script src="orderly.js"></script>
-<script>
-	$(function () {
-		new Orderly($('#list'));
-	});
-</script>
+	<script>
+		$(function () {
+			new Orderly($('#list'));
+		});
+	</script>
 
-<style>
-	ul#list {
-		list-style: none;
-		width: 400px;
-		padding: 0;
-	}
-	ul#list li {
-		margin: 10px;
-		padding: 5px;
-		border: 1px solid #ccc;
-		background-color: #eee;
-	}
-</style>
-
-<ul id="list">
-	<li>item 1</li>
-	<li>item 2</li>
-	<li>item 3</li>
-	<li>item 4</li>
-	<li>item 5</li>
-	<li>item 6</li>
-	<li>item 7</li>
-</ul>
+	<ul id="list">
+		<li>item 1</li>
+		<li>item 2</li>
+		<li>item 3</li>
+		<li>item 4</li>
+		<li>item 5</li>
+		<li>item 6</li>
+		<li>item 7</li>
+	</ul>
+</body>
+</html>

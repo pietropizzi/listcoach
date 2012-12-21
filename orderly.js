@@ -16,7 +16,9 @@
         .not(this.$target)
           .css('-webkit-transition', 'top .3s');
 
-      this.$target.css('z-index', 1);
+      this.$target
+        .css('z-index', 1)
+        .addClass('orderly-sorting-element');
     } else {
       this.$items
         .css('-webkit-transition', '')
@@ -26,27 +28,57 @@
           left: '',
           'z-index': ''
         });
+
+      this.$target.removeClass('orderly-sorting-element');
     }
   }
 
   Orderly = function (el, options) {
+    this.settings = $.extend({}, defaultOptions, options);
+    this.$list = $(el).first();
+    this.$items = null;
+    this.height = 0;
+    this._enabled = false;
+  };
+
+  Orderly.prototype.enable = function() {
     this.onMouseDown = __bind(this.onMouseDown, this);
     this.onMouseMove = __bind(this.onMouseMove, this);
     this.onMouseUp   = __bind(this.onMouseUp, this);
 
-    this.settings = $.extend({}, defaultOptions, options);
-
-    this.$list = $(el).first();
+    this.setItems();
+    this.setItemHeight();
     this.$list.on('mousedown', [this.settings.itemSelector, this.settings.handleSelector].join(' '), this.onMouseDown);
+    this._enabled = true;
   };
 
-  Orderly.prototype.refreshItems = function() {
-    this.$items = this.$list.find(this.settings.itemSelector);
+  Orderly.prototype.disable = function() {
+    this.$list.off('mousedown', [this.settings.itemSelector, this.settings.handleSelector].join(' '), this.onMouseDown);
+    this.$items = null;
+    this.height = 0;
+    this._enabled = false;
+  };
+
+  Orderly.prototype.destroy = function() {
+    if (this._enabled) {
+      this.disable();
+    }
+    delete this._enabled;
+    delete this.$list;
+    delete this.$items;
+    delete this.settings;
+  };
+
+  Orderly.prototype.setItemHeight = function() {
     if (this.$items.length > 1) {
       return this.height = this.$items.get(1).offsetTop - this.$items.get(0).offsetTop;
     } else {
       return this.height = 0;
     }
+  };
+
+  Orderly.prototype.setItems = function() {
+    this.$items = this.$list.find(this.settings.itemSelector);
   };
 
   Orderly.prototype.onMouseDown = function(event) {
@@ -84,7 +116,7 @@
   };
 
   Orderly.prototype.start = function() {
-    this.refreshItems();
+    this.setItems();
     toggleSortingStyles.call(this, true);
     this.ti = this.$items.index(this.$target);
   };

@@ -56,10 +56,8 @@
     onDragStart: function(isTouch, event) {
       var coordObj;
 
-      console.log(event.originalEvent.touches.length);
-
       if (supports.touch && event.originalEvent.touches.length > 1) {
-        return false;
+        return true;
       }
 
       coordObj = isTouch ? event.originalEvent.changedTouches[0] : event;

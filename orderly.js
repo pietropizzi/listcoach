@@ -4,7 +4,20 @@
       defaultOptions = {
         itemSelector: 'li',
         handleSelector: ''
-      };
+      },
+      supports;
+
+  supports = (function () {
+    return {
+      touch: (function() {
+        try {
+          return window.hasOwnProperty('ontouchstart');
+        } catch (e) {
+          return false;
+        }
+      })()
+    };
+  })();
 
   function __bind (fn, me){ return function(){ return fn.apply(me, arguments); }; }
 
@@ -15,29 +28,20 @@
         .not(this.$dragging)
           .css('-webkit-transition', 'top .3s');
 
-      this.$dragging
-        .css('z-index', 1)
-        .addClass('orderly-sorting-element');
+      this.$dragging.css('z-index', 1);
     } else {
       this.$items
-        .css('-webkit-transition', '')
         .css({
+          '-webkit-transition': '',
           position: '',
           top: '',
           left: '',
           'z-index': ''
         });
-
-      this.$dragging.removeClass('orderly-sorting-element');
     }
-  }
 
-  function isTouchDevice () {
-    try {
-      return window.hasOwnProperty('ontouchstart');
-    } catch (e) {
-      return false;
-    }
+    this.$dragging.toggleClass('orderly-sorting-element', toggle);
+    this.$list.toggleClass('orderly-sorting-list', toggle);
   }
 
   Orderly = function (el, options) {
@@ -49,7 +53,7 @@
   };
 
   Orderly.prototype.enable = function() {
-    if (isTouchDevice()) {
+    if (supports.touch) {
       this.onTouchStart = __bind(this.onTouchStart, this);
       this.onTouchMove = __bind(this.onTouchMove, this);
       this.onTouchEnd   = __bind(this.onTouchEnd, this);

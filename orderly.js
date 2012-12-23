@@ -36,7 +36,6 @@
 
     $list: null,
     $items: null,
-    $dragging: null,
 
     enable: function() {
       toggleStartListeners.call(this, true);
@@ -61,9 +60,7 @@
         .on(isTouch ? 'touchmove' : 'mousemove', this.onDragMove)
         .on(isTouch ? 'touchend' : 'mouseup', this.onDragEnd);
 
-      this.startX = coordObj.pageX;
-      this.startY = coordObj.pageY;
-      this.start();
+      this.start(coordObj.pageX, coordObj.pageY);
       return false;
     },
 
@@ -77,8 +74,6 @@
         .off(isTouch ? 'touchmove' : 'mousemove', this.onDragMove)
         .off(isTouch ? 'touchend' : 'mouseup', this.onDragEnd);
 
-      delete this.startX;
-      delete this.startY;
       this.end();
     },
 
@@ -106,7 +101,10 @@
       }
     },
 
-    start: function() {
+    start: function(startX, startY) {
+      this.startX = startX;
+      this.startY = startY;
+
       this.$items = this.getItems();
       this.$dragging = this.getDraggingElement();
 
@@ -165,6 +163,8 @@
         this.$dragging[insertFunc](insertEl);
       };
 
+      delete this.startX;
+      delete this.startY;
       delete this.currentIndex;
       delete this.startIndex;
       delete this.$dragging;

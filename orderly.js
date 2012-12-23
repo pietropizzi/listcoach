@@ -19,8 +19,6 @@
     };
   })();
 
-  function __bind (fn, me){ return function(){ return fn.apply(me, arguments); }; }
-
   function toggleSortingStyles (toggle) {
     if (toggle) {
       this.$items
@@ -53,9 +51,9 @@
   };
 
   Orderly.prototype.enable = function() {
-    this.onDragStart = __bind(this.onDragStart, this, supports.touch);
-    this.onDragMove = __bind(this.onDragMove, this, supports.touch);
-    this.onDragEnd = __bind(this.onDragEnd, this, supports.touch);
+    this.onDragStart = this.onDragStart.bind(this, supports.touch);
+    this.onDragMove  = this.onDragMove.bind(this, supports.touch);
+    this.onDragEnd   = this.onDragEnd.bind(this, supports.touch);
     this.$list.on(supports.touch ? 'touchstart' : 'mousedown', [this.settings.itemSelector, this.settings.handleSelector].join(' '), this.onDragStart);
 
     this.setItems();
@@ -71,7 +69,7 @@
     this._enabled = false;
   };
 
-  Orderly.prototype.onDragStart = function(event, isTouch) {
+  Orderly.prototype.onDragStart = function(isTouch, event) {
     var coordObj = isTouch ? event.originalEvent.changedTouches[0] : event;
 
     $(isTouch ? event.target : document)
@@ -84,12 +82,12 @@
     return false;
   };
 
-  Orderly.prototype.onDragMove = function(event, isTouch) {
+  Orderly.prototype.onDragMove = function(isTouch, event) {
     var coordObj = isTouch ? event.originalEvent.changedTouches[0] : event;
     this.move(coordObj.pageX - this.startX, coordObj.pageY - this.startY);
   };
 
-  Orderly.prototype.onDragEnd = function(event, isTouch) {
+  Orderly.prototype.onDragEnd = function(isTouch, event) {
     $(isTouch ? event.target : document)
       .off(isTouch ? 'touchmove' : 'mousemove', this.onDragMove)
       .off(isTouch ? 'touchend' : 'mouseup', this.onDragEnd);

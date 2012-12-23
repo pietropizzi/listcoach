@@ -31,7 +31,7 @@
   $.extend(Orderly.prototype, {
 
     settings: null,
-    height: 0,
+    itemHeight: 0,
     itemCount: 0,
 
     $list: null,
@@ -43,7 +43,7 @@
 
       this.$items = this.getItems();
       this.itemCount = this.getItemCount();
-      this.height = this.getItemHeight();
+      this.itemHeight = this.getItemHeight();
     },
 
     disable: function() {
@@ -51,7 +51,7 @@
 
       this.$items = null;
       this.itemCount = 0;
-      this.height = 0;
+      this.itemHeight = 0;
     },
 
     onDragStart: function(isTouch, event) {
@@ -125,7 +125,7 @@
         left: dx
       });
 
-      indexDiff = Math.round(dy / this.height);
+      indexDiff = Math.round(dy / this.itemHeight);
       indexDiff = Math.max(indexDiff, -this.startIndex); 
       indexDiff = Math.min(indexDiff, this.itemCount - this.startIndex - 1);
       newIndex = this.startIndex + indexDiff;
@@ -146,9 +146,9 @@
         }
 
         if (i < this.startIndex && i >= newIndex) {
-          top = this.height;
+          top = this.itemHeight;
         } else if (i > this.startIndex && i <= newIndex) {
-          top = -this.height;
+          top = -this.itemHeight;
         }
 
         $(item).css('top', top);

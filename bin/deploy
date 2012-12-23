@@ -1,0 +1,1 @@
+git checkout --orphan gh-pages && rm .git/index && git add . && git commit -am "Automatic update" && git push --force && git checkout master -f && git branch -D gh-pages

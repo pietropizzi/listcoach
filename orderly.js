@@ -54,7 +54,13 @@
     },
 
     onDragStart: function(isTouch, event) {
-      var coordObj = isTouch ? event.originalEvent.changedTouches[0] : event;
+      var coordObj;
+
+      if (supports.tocuh && event.originalEvent.touches.length > 1) {
+        return false;
+      }
+
+      coordObj = isTouch ? event.originalEvent.changedTouches[0] : event;
 
       $(isTouch ? event.target : document)
         .on(isTouch ? 'touchmove' : 'mousemove', this.onDragMove)
@@ -75,30 +81,6 @@
         .off(isTouch ? 'touchend' : 'mouseup', this.onDragEnd);
 
       this.end();
-    },
-
-    getItemCount: function() {
-      return (this.$items && this.$items.length) ? this.$items.length : 0;
-    },
-
-    getItemHeight: function() {
-      if (this.$items.length > 1) {
-        return this.$items.get(1).offsetTop - this.$items.get(0).offsetTop;
-      } else {
-        return 0;
-      }
-    },
-
-    getItems: function() {
-      return this.$list.find(this.settings.itemSelector);
-    },
-
-    getDraggingElement: function() {
-      if (this.settings.handleSelector) {
-        return $(event.target).parent(this.settings.itemSelector);
-      } else {
-        return $(event.target);
-      }
     },
 
     start: function(startX, startY) {
@@ -168,6 +150,30 @@
       delete this.currentIndex;
       delete this.startIndex;
       delete this.$dragging;
+    },
+
+    getItemCount: function() {
+      return (this.$items && this.$items.length) ? this.$items.length : 0;
+    },
+
+    getItemHeight: function() {
+      if (this.$items.length > 1) {
+        return this.$items.get(1).offsetTop - this.$items.get(0).offsetTop;
+      } else {
+        return 0;
+      }
+    },
+
+    getItems: function() {
+      return this.$list.find(this.settings.itemSelector);
+    },
+
+    getDraggingElement: function() {
+      if (this.settings.handleSelector) {
+        return $(event.target).parent(this.settings.itemSelector);
+      } else {
+        return $(event.target);
+      }
     }
   });
 

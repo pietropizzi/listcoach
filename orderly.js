@@ -32,9 +32,11 @@
 
     settings: null,
     height: 0,
+    itemCount: 0,
 
     $list: null,
     $items: null,
+    $dragging: null,
 
     enable: function() {
       toggleStartListeners.call(this, true);

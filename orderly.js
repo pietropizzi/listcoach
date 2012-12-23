@@ -56,7 +56,7 @@
     onDragStart: function(isTouch, event) {
       var coordObj;
 
-      if (supports.tocuh && event.originalEvent.touches.length > 1) {
+      if (supports.touch && event.originalEvent.touches.length > 1) {
         return false;
       }
 
@@ -106,7 +106,7 @@
       });
 
       indexDiff = Math.round(dy / this.itemHeight);
-      indexDiff = Math.max(indexDiff, -this.startIndex); 
+      indexDiff = Math.max(indexDiff, -this.startIndex);
       indexDiff = Math.min(indexDiff, this.itemCount - this.startIndex - 1);
       newIndex = this.startIndex + indexDiff;
 
@@ -143,7 +143,7 @@
       
       if (this.currentIndex !== this.startIndex) {
         this.$dragging[insertFunc](insertEl);
-      };
+      }
 
       delete this.startX;
       delete this.startY;

@@ -56,6 +56,7 @@
     onDragStart: function(isTouch, event) {
       var coordObj;
 
+      // TODO This does not work
       if (supports.touch && event.originalEvent.touches.length > 1) {
         return true;
       }

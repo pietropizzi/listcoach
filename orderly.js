@@ -53,17 +53,10 @@
   };
 
   Orderly.prototype.enable = function() {
-    if (supports.touch) {
-      this.onTouchStart = __bind(this.onTouchStart, this);
-      this.onTouchMove = __bind(this.onTouchMove, this);
-      this.onTouchEnd   = __bind(this.onTouchEnd, this);
-      this.$list.on('touchstart', [this.settings.itemSelector, this.settings.handleSelector].join(' '), this.onTouchStart);
-    } else {
-      this.onMouseDown = __bind(this.onMouseDown, this);
-      this.onMouseMove = __bind(this.onMouseMove, this);
-      this.onMouseUp   = __bind(this.onMouseUp, this);
-      this.$list.on('mousedown', [this.settings.itemSelector, this.settings.handleSelector].join(' '), this.onMouseDown);
-    }
+    this.onDragStart = __bind(this.onDragStart, this, supports.touch);
+    this.onDragMove = __bind(this.onDragMove, this, supports.touch);
+    this.onDragEnd = __bind(this.onDragEnd, this, supports.touch);
+    this.$list.on(supports.touch ? 'touchstart' : 'mousedown', [this.settings.itemSelector, this.settings.handleSelector].join(' '), this.onDragStart);
 
     this.setItems();
     this.setItemHeight();
@@ -71,70 +64,39 @@
   };
 
   Orderly.prototype.disable = function() {
-    if (isTouchDevice()) {
-      this.$list.off('touchstart', [this.settings.itemSelector, this.settings.handleSelector].join(' '), this.onTouchStart);
-    } else {
-      this.$list.off('mousedown', [this.settings.itemSelector, this.settings.handleSelector].join(' '), this.onMouseDown);
-    }
+    this.$list.off(supports.touch ? 'touchstart' : 'mousedown', [this.settings.itemSelector, this.settings.handleSelector].join(' '), this.onDragStart);
 
     this.$items = null;
     this.height = 0;
     this._enabled = false;
   };
 
-  Orderly.prototype.onMouseDown = function(event) {
-    $(document).on({
-      mousemove: this.onMouseMove,
-      mouseup: this.onMouseUp
-    });
+  Orderly.prototype.onDragStart = function(event, isTouch) {
+    var coordObj = isTouch ? event.originalEvent.changedTouches[0] : event;
 
-    this.startX = event.pageX;
-    this.startY = event.pageY;
+    $(isTouch ? event.target : document)
+      .on(isTouch ? 'touchmove' : 'mousemove', this.onDragMove)
+      .on(isTouch ? 'touchend' : 'mouseup', this.onDragEnd);
+
+    this.startX = coordObj.pageX;
+    this.startY = coordObj.pageY;
     this.start();
     return false;
   };
 
-  Orderly.prototype.onMouseMove = function(event) {
-    this.move(event.pageX - this.startX, event.pageY - this.startY);
+  Orderly.prototype.onDragMove = function(event, isTouch) {
+    var coordObj = isTouch ? event.originalEvent.changedTouches[0] : event;
+    this.move(coordObj.pageX - this.startX, coordObj.pageY - this.startY);
   };
 
-  Orderly.prototype.onMouseUp = function() {
-    $(document).off({
-      mousemove: this.onMouseMove,
-      mouseup: this.onMouseUp
-    });
-    this.end();
+  Orderly.prototype.onDragEnd = function(event, isTouch) {
+    $(isTouch ? event.target : document)
+      .off(isTouch ? 'touchmove' : 'mousemove', this.onDragMove)
+      .off(isTouch ? 'touchend' : 'mouseup', this.onDragEnd);
+
     delete this.startX;
     delete this.startY;
-  };
-
-  Orderly.prototype.onTouchStart = function(event) {
-    var changedTouch = event.originalEvent.changedTouches[0];
-
-    $(event.target).on({
-      touchmove: this.onTouchMove,
-      touchend: this.onTouchEnd
-    });
-
-    this.startX = changedTouch.pageX;
-    this.startY = changedTouch.pageY;
-    this.start();
-    return false;
-  };
-
-  Orderly.prototype.onTouchMove = function(event) {
-    var changedTouch = event.originalEvent.changedTouches[0];
-    this.move(changedTouch.pageX - this.startX, changedTouch.pageY - this.startY);
-  };
-
-  Orderly.prototype.onTouchEnd = function(event) {
-    $(event.target).off({
-      touchmove: this.onTouchMove,
-      touchend: this.onTouchEnd
-    });
     this.end();
-    delete this.startX;
-    delete this.startY;
   };
 
   Orderly.prototype.setItemHeight = function() {
@@ -166,7 +128,6 @@
 
     this.startIndex = this.$items.index(this.$dragging);
     this.currentIndex = this.startIndex;
-    console.log('start: ', this.startIndex);
   };
 
   Orderly.prototype.move = function(dx, dy) {

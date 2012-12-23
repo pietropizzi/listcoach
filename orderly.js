@@ -78,16 +78,6 @@
     this._enabled = false;
   };
 
-  Orderly.prototype.destroy = function() {
-    if (this._enabled) {
-      this.disable();
-    }
-    delete this._enabled;
-    delete this.$list;
-    delete this.$items;
-    delete this.settings;
-  };
-
   Orderly.prototype.onMouseDown = function(event) {
     $(document).on({
       mousemove: this.onMouseMove,

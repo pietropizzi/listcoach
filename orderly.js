@@ -6,17 +6,16 @@
         handleSelector: ''
       };
 
-
   function __bind (fn, me){ return function(){ return fn.apply(me, arguments); }; }
 
   function toggleSortingStyles (toggle) {
     if (toggle) {
       this.$items
         .css('position', 'relative')
-        .not(this.$target)
+        .not(this.$dragging)
           .css('-webkit-transition', 'top .3s');
 
-      this.$target
+      this.$dragging
         .css('z-index', 1)
         .addClass('orderly-sorting-element');
     } else {
@@ -29,7 +28,7 @@
           'z-index': ''
         });
 
-      this.$target.removeClass('orderly-sorting-element');
+      this.$dragging.removeClass('orderly-sorting-element');
     }
   }
 
@@ -154,68 +153,80 @@
 
   Orderly.prototype.setItems = function() {
     this.$items = this.$list.find(this.settings.itemSelector);
+    this.itemCount = this.$items.length;
   };
 
-  Orderly.prototype.setTarget = function() {
+  Orderly.prototype.setDragging = function() {
     if (this.settings.handleSelector) {
-      this.$target = $(event.target).parent(this.settings.itemSelector);
+      this.$dragging = $(event.target).parent(this.settings.itemSelector);
     } else {
-      this.$target = $(event.target);
+      this.$dragging = $(event.target);
     }
   };
 
   Orderly.prototype.start = function() {
     this.setItems();
-    this.setTarget();
+    this.setDragging();
+
     toggleSortingStyles.call(this, true);
-    this.ti = this.$items.index(this.$target);
+
+    this.startIndex = this.$items.index(this.$dragging);
+    this.currentIndex = this.startIndex;
+    console.log('start: ', this.startIndex);
   };
 
   Orderly.prototype.move = function(dx, dy) {
-    var ci, di;
-    var _this = this;
-    this.$target.css({
+    var indexDiff, newIndex;
+
+    // Move dragged object
+    this.$dragging.css({
       top: dy,
       left: dx
     });
-    di = Math.round(dy / this.height);
-    if (di === this.di) return;
-    this.di = di;
-    ci = this.ti + this.di;
+
+    indexDiff = Math.round(dy / this.height);
+    indexDiff = Math.max(indexDiff, -this.startIndex); 
+    indexDiff = Math.min(indexDiff, this.itemCount - this.startIndex - 1);
+    newIndex = this.startIndex + indexDiff;
+
+    // If the current index did not change return
+    if (this.currentIndex === newIndex) {
+      return;
+    }
+
+    this.currentIndex = newIndex;
 
     this.$items.each(function(i, item) {
-      var top;
-      if (i === _this.ti) return;
-      switch (true) {
-        case i >= ci && i < _this.ti:
-          top = _this.height;
-          break;
-        case i <= ci && i > _this.ti:
-          top = -_this.height;
-          break;
-        default:
-          top = '';
+      var top = '';
+
+      // If this item is the dragged one we don't need to do anything
+      if (i === this.startIndex) {
+        return;
       }
+
+      if (i < this.startIndex && i >= newIndex) {
+        top = this.height;
+      } else if (i > this.startIndex && i <= newIndex) {
+        top = -this.height;
+      }
+
       $(item).css('top', top);
-    });
+    }.bind(this));
   };
 
   Orderly.prototype.end = function() {
-    var ci, func, maxi;
+    var insertFunc = this.currentIndex < this.startIndex ? 'insertBefore' : 'insertAfter',
+        insertEl = this.$items.eq(this.currentIndex);
+
     toggleSortingStyles.call(this, false);
-    ci = this.ti + this.di;
-    maxi = this.$items.length - 1;
-    if (ci < 0) ci = 0;
-    if (ci > maxi) ci = maxi;
-    if (this.di < 0) {
-      func = 'before';
-    } else {
-      func = 'after';
-    }
-    if (ci !== this.ti) $(this.$items.get(ci))[func](this.$target);
-    delete this.di;
-    delete this.ti;
-    delete this.$target;
+    
+    if (this.currentIndex !== this.startIndex) {
+      this.$dragging[insertFunc](insertEl);
+    };
+
+    delete this.currentIndex;
+    delete this.startIndex;
+    delete this.$dragging;
   };
 
   if (typeof module !== 'undefined' && module.exports) {

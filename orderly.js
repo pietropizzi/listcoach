@@ -15,6 +15,24 @@
         } catch (e) {
           return false;
         }
+      })(),
+
+      transitionPrefix: (function() {
+        var style = document.createElement('orderly').style,
+            transitionProps = ["WebkitTransition", "MozTransition", "OTransition", "msTransition"],
+            prefix;
+
+        for ( var i in transitionProps ) {
+          var prop = transitionProps[i];
+          if ( style[prop] !== undefined ) {
+            prefix = prop.split('Transition')[0];
+          }
+        }
+        
+        if (prefix) {
+          return '-' + prefix.charAt(0).toLowerCase() + prefix.slice(1) + '-';
+        }
+        return false;
       })()
     };
   })();
@@ -67,6 +85,7 @@
         .on(isTouch ? 'touchmove' : 'mousemove', this.onDragMove)
         .on(isTouch ? 'touchend' : 'mouseup', this.onDragEnd);
 
+      this.$dragging = this.getDraggingElement(event);
       this.start(coordObj.pageX, coordObj.pageY);
       return false;
     },
@@ -89,8 +108,6 @@
       this.startY = startY;
 
       this.$items = this.getItems();
-      this.$dragging = this.getDraggingElement();
-
       toggleSortingStyles.call(this, true);
 
       this.startIndex = this.$items.index(this.$dragging);
@@ -169,7 +186,7 @@
       return this.$list.find(this.settings.itemSelector);
     },
 
-    getDraggingElement: function() {
+    getDraggingElement: function(event) {
       if (this.settings.handleSelector) {
         return $(event.target).parent(this.settings.itemSelector);
       } else {
@@ -179,17 +196,18 @@
   });
 
   function toggleSortingStyles (toggle) {
+    var transitionProp = supports.transitionPrefix + 'transition';
     if (toggle) {
       this.$items
         .css('position', 'relative')
         .not(this.$dragging)
-          .css('-webkit-transition', 'top .3s');
+          .css(transitionProp, 'top .3s');
 
       this.$dragging.css('z-index', 1);
     } else {
       this.$items
+        .css(transitionProp, '')
         .css({
-          '-webkit-transition': '',
           position: '',
           top: '',
           left: '',

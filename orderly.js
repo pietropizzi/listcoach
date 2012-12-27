@@ -160,12 +160,6 @@
       toggleSortingStyles.call(this, false).done(function() {
         if (this.currentIndex !== this.startIndex) {
           this.$dragging[insertFunc](insertEl);
-          this.$dragging.css({top: '', left: ''});
-          this.$items.not(this.$dragging).css({
-            top: '',
-            left: '',
-            'z-index': ''
-          });
         }
 
         delete this.startX;
@@ -203,36 +197,32 @@
 
   function toggleSortingStyles (toggle) {
     var transitionProp = supports.transitionPrefix,
-        transitionDeferred = $.Deferred();
+        transitionDeferred = $.Deferred(),
+        resetTop;
 
     if (toggle) {
-      this.$items
-        .css(transitionProp, '')
-        .css({
-          position: 'relative',
-          top: '0'
-        })
-        .not(this.$dragging)
-          .css(transitionProp, 'top .3s');
-
-      this.$dragging.css('z-index', 1);
+      // Set transitions and starting position on all items
+      this.$items.css(transitionProp, 'top .3s').css({position: 'relative', top: '0'});
+      // No transition for draggin item
+      this.$dragging.css(transitionProp, '').css('z-index', 1);
       transitionDeferred.resolve();
     } else {
-      this.$items
-        .not(this.$dragging)
-          .css(transitionProp, '');
-          // .css({
-          //   // position: '',
-          //   top: '',
-          //   left: '',
-          //   'z-index': ''
-          // });
-      var y = (this.currentIndex - this.startIndex) * this.itemHeight;
-      console.info('orderly.js: %o', y);
-      this.$dragging.css(transitionProp, 'top .2s, left .2s').css('top', y).css('left','0');
+      resetTop = (this.currentIndex - this.startIndex) * this.itemHeight;
+      // No transition for all items
+      this.$items.css(transitionProp, '');
+      // Transition for draging item
+      this.$dragging.css(transitionProp, 'top .2s, left .2s').css({top: resetTop, left: '0'});
+
       setTimeout(function() {
+        // Reset item styles
+        this.$items.css({
+          position: '',
+          top: '',
+          left: '',
+          'z-index': ''
+        });
         transitionDeferred.resolve();
-      }, 200);
+      }.bind(this), 200);
     }
 
     this.$dragging.toggleClass('orderly-sorting-element', toggle);

@@ -2,6 +2,7 @@
   var Orderly,
       global,
       supports,
+      $doc,
       defaultOptions = {
         itemSelector: 'li',
         handleSelector: ''
@@ -40,6 +41,7 @@
   Orderly = function (el, options) {
     this.settings = $.extend({}, defaultOptions, options);
     this.$list = $(el).first();
+    $doc = $(document);
 
     this.onDragStart = this.onDragStart.bind(this, supports.touch);
     this.onDragMove  = this.onDragMove.bind(this, supports.touch);
@@ -51,6 +53,7 @@
     settings: null,
     itemHeight: 0,
     itemCount: 0,
+    scrolling: false,
 
     $list: null,
     $items: null,
@@ -104,6 +107,7 @@
     },
 
     start: function(startX, startY) {
+      this.containerScroll = window.innerHeight + $doc.scrollTop();
       this.startX = startX;
       this.startY = startY;
 
@@ -128,6 +132,8 @@
       indexDiff = Math.min(indexDiff, this.itemCount - this.startIndex - 1);
       newIndex = this.startIndex + indexDiff;
 
+      this.scroll();
+
       // If the current index did not change return
       if (this.currentIndex === newIndex) {
         return;
@@ -151,6 +157,20 @@
 
         $(item).css('top', top);
       }.bind(this));
+    },
+
+    scroll: function() {
+      var draggingTop = this.$dragging.offset().top;
+
+      if ((draggingTop + 20) > this.containerScroll)  {
+        this.scrolling = true;
+        $doc.scrollTop($doc.scrollTop() + 8);
+        this.containerScroll += 8;
+      } else if ((draggingTop - 20) < $doc.scrollTop()) {
+        this.scrolling = true;
+        $doc.scrollTop($doc.scrollTop() - 8);
+        this.containerScroll -= 8;
+      }
     },
 
     end: function() {

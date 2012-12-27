@@ -157,17 +157,23 @@
       var insertFunc = this.currentIndex < this.startIndex ? 'insertBefore' : 'insertAfter',
           insertEl = this.$items.eq(this.currentIndex);
 
-      toggleSortingStyles.call(this, false);
-      
-      if (this.currentIndex !== this.startIndex) {
-        this.$dragging[insertFunc](insertEl);
-      }
+      toggleSortingStyles.call(this, false).done(function() {
+        if (this.currentIndex !== this.startIndex) {
+          this.$dragging[insertFunc](insertEl);
+          this.$dragging.css({top: '', left: ''});
+          this.$items.not(this.$dragging).css({
+            top: '',
+            left: '',
+            'z-index': ''
+          });
+        }
 
-      delete this.startX;
-      delete this.startY;
-      delete this.currentIndex;
-      delete this.startIndex;
-      delete this.$dragging;
+        delete this.startX;
+        delete this.startY;
+        delete this.currentIndex;
+        delete this.startIndex;
+        delete this.$dragging;
+      }.bind(this));
     },
 
     getItemCount: function() {
@@ -196,9 +202,12 @@
   });
 
   function toggleSortingStyles (toggle) {
-    var transitionProp = supports.transitionPrefix;
+    var transitionProp = supports.transitionPrefix,
+        transitionDeferred = $.Deferred();
+
     if (toggle) {
       this.$items
+        .css(transitionProp, '')
         .css({
           position: 'relative',
           top: '0'
@@ -207,19 +216,29 @@
           .css(transitionProp, 'top .3s');
 
       this.$dragging.css('z-index', 1);
+      transitionDeferred.resolve();
     } else {
       this.$items
-        .css(transitionProp, '')
-        .css({
-          position: '',
-          top: '',
-          left: '',
-          'z-index': ''
-        });
+        .not(this.$dragging)
+          .css(transitionProp, '');
+          // .css({
+          //   // position: '',
+          //   top: '',
+          //   left: '',
+          //   'z-index': ''
+          // });
+      var y = (this.currentIndex - this.startIndex) * this.itemHeight;
+      console.info('orderly.js: %o', y);
+      this.$dragging.css(transitionProp, 'top .2s, left .2s').css('top', y).css('left','0');
+      setTimeout(function() {
+        transitionDeferred.resolve();
+      }, 200);
     }
 
     this.$dragging.toggleClass('orderly-sorting-element', toggle);
     this.$list.toggleClass('orderly-sorting-list', toggle);
+
+    return transitionDeferred;
   }
 
   function toggleStartListeners (toggle) {

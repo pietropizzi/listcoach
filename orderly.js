@@ -19,20 +19,20 @@
 
       transitionPrefix: (function() {
         var style = document.createElement('orderly').style,
-            transitionProps = ["WebkitTransition", "MozTransition", "OTransition", "msTransition"],
-            prefix;
+            transitionProps = ['transition', 'WebkitTransition', 'MozTransition', 'OTransition', 'msTransition'],
+            transition;
 
         for ( var i in transitionProps ) {
           var prop = transitionProps[i];
           if ( style[prop] !== undefined ) {
-            prefix = prop.split('Transition')[0];
+            transition = prop.split('Transition');
+            transition = transition.length === 1 ?
+                transition[0] :
+                '-' + transition[0].charAt(0).toLowerCase() + transition[0].slice(1) + '-transition';
           }
         }
-        
-        if (prefix) {
-          return '-' + prefix.charAt(0).toLowerCase() + prefix.slice(1) + '-';
-        }
-        return false;
+
+        return transition;
       })()
     };
   })();
@@ -58,7 +58,7 @@
     enable: function() {
       toggleStartListeners.call(this, true);
 
-      this.$items = this.getItems();
+      this.$items = this.getItems().css('top', '0');
       this.itemCount = this.getItemCount();
       this.itemHeight = this.getItemHeight();
     },
@@ -136,7 +136,7 @@
       this.currentIndex = newIndex;
 
       this.$items.each(function(i, item) {
-        var top = '';
+        var top = '0';
 
         // If this item is the dragged one we don't need to do anything
         if (i === this.startIndex) {
@@ -196,10 +196,13 @@
   });
 
   function toggleSortingStyles (toggle) {
-    var transitionProp = supports.transitionPrefix + 'transition';
+    var transitionProp = supports.transitionPrefix;
     if (toggle) {
       this.$items
-        .css('position', 'relative')
+        .css({
+          position: 'relative',
+          top: '0'
+        })
         .not(this.$dragging)
           .css(transitionProp, 'top .3s');
 

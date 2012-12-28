@@ -18,7 +18,7 @@
         }
       })(),
 
-      transitionPrefix: (function() {
+      transitionProperty: (function() {
         var style = document.createElement('orderly').style,
             transitionProps = ['transition', 'WebkitTransition', 'MozTransition', 'OTransition', 'msTransition'],
             transition;
@@ -216,7 +216,7 @@
   });
 
   function toggleSortingStyles (toggle) {
-    var transitionProp = supports.transitionPrefix,
+    var transitionProp = supports.transitionProperty,
         transitionDeferred = $.Deferred(),
         resetTop;
 

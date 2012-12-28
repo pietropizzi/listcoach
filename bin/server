@@ -1,0 +1,12 @@
+#!/usr/bin/env node
+
+var connect  = require('connect');
+var path     = require('path');
+
+var serverRoot = path.join(__dirname, '..');
+var port = 9300;
+
+connect.createServer(
+  connect.static(serverRoot)
+).listen(port);
+console.log('Server started on', 'http://orderly.dev:' + port);

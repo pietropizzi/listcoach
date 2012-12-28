@@ -1,0 +1,16 @@
+{
+  "name": "Orderly",
+  "version": "0.0.1",
+  "description": "Orderly is your smooth drag and drop list sorter",
+  "author": "Peter Minarik",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:pietropizzi/orderly.git"
+  },
+  "dependencies": {
+    "connect": "=1.8.2"
+  },
+  "engines": {
+    "node": "~>0.4.0"
+  }
+}

@@ -7,7 +7,8 @@
         itemSelector: 'li',
         handleSelector: '',
         draggingElementClass: 'orderly-dragging-element',
-        draggingListClass: 'orderly-dragging-list'
+        draggingListClass: 'orderly-dragging-list',
+        scrollOffset: 20
       };
 
   supports = (function () {
@@ -109,7 +110,7 @@
     },
 
     start: function(startX, startY) {
-      this.containerScroll = window.innerHeight + $doc.scrollTop();
+      this.containerScroll = window.innerHeight + window.scrollY;
       this.startX = startX;
       this.startY = startY;
 
@@ -162,17 +163,20 @@
     },
 
     scroll: function() {
-      var draggingTop = this.$dragging.offset().top;
+      var draggingTop = this.$dragging.offset().top + this.itemHeight / 2,
+          scrollBy;
 
-      if ((draggingTop + 20) > this.containerScroll)  {
-        this.scrolling = true;
-        $doc.scrollTop($doc.scrollTop() + 8);
-        this.containerScroll += 8;
-      } else if ((draggingTop - 20) < $doc.scrollTop()) {
-        this.scrolling = true;
-        $doc.scrollTop($doc.scrollTop() - 8);
-        this.containerScroll -= 8;
+      if ((draggingTop + this.settings.scrollOffset) > this.containerScroll)  {
+        scrollBy = 8;
+      } else if ((draggingTop - this.settings.scrollOffset) < window.scrollY && window.scrollY > 0) {
+        scrollBy = -8;
+      } else {
+        return;
       }
+
+      window.scrollBy(0, scrollBy);
+      this.containerScroll += scrollBy;
+      this.containerScroll = Math.min(this.containerScroll, $(document).height());
     },
 
     end: function() {

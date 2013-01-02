@@ -2,13 +2,14 @@
   var Orderly,
       global,
       supports,
+      scrollTimeout,
       $doc,
       defaultOptions = {
         itemSelector: 'li',
         handleSelector: '',
         draggingElementClass: 'orderly-dragging-element',
         draggingListClass: 'orderly-dragging-list',
-        scrollOffset: 20
+        scrollOffset: 50
       };
 
   supports = (function () {
@@ -135,7 +136,9 @@
       indexDiff = Math.min(indexDiff, this.itemCount - this.startIndex - 1);
       newIndex = this.startIndex + indexDiff;
 
-      this.scroll();
+      if (!this.scrolling) {
+        this.scroll(dx, dy);
+      }
 
       // If the current index did not change return
       if (this.currentIndex === newIndex) {
@@ -162,7 +165,7 @@
       }.bind(this));
     },
 
-    scroll: function() {
+    scroll: function(dx, dy) {
       var draggingTop = this.$dragging.offset().top + this.itemHeight / 2,
           scrollBy;
 
@@ -171,12 +174,17 @@
       } else if ((draggingTop - this.settings.scrollOffset) < window.scrollY && window.scrollY > 0) {
         scrollBy = -8;
       } else {
+        this.scrolling = false;
         return;
       }
 
+      this.scrolling = true;
       window.scrollBy(0, scrollBy);
       this.containerScroll += scrollBy;
       this.containerScroll = Math.min(this.containerScroll, $(document).height());
+
+      scrollTimeout = setTimeout(this.scroll.bind(this, dx, dy + scrollBy, true), 50);
+      this.move(dx, dy + scrollBy);
     },
 
     end: function() {
@@ -187,6 +195,8 @@
         if (this.currentIndex !== this.startIndex) {
           this.$dragging[insertFunc](insertEl);
         }
+
+        clearTimeout(scrollTimeout);
 
         delete this.startX;
         delete this.startY;

@@ -1,5 +1,5 @@
 (function() {
-  var Orderly,
+  var Listcoach,
       global,
       supports,
       scrollTimeout,
@@ -7,8 +7,8 @@
       defaultOptions = {
         itemSelector: 'li',
         handleSelector: '',
-        draggingElementClass: 'orderly-dragging-element',
-        draggingListClass: 'orderly-dragging-list',
+        draggingElementClass: 'listcoach-dragging-element',
+        draggingListClass: 'listcoach-dragging-list',
         scrollOffset: 50
       };
 
@@ -23,7 +23,7 @@
       })(),
 
       transitionProperty: (function() {
-        var style = document.createElement('orderly').style,
+        var style = document.createElement('listcoach').style,
             transitionProps = ['transition', 'WebkitTransition', 'MozTransition', 'OTransition', 'msTransition'],
             transition;
 
@@ -42,7 +42,7 @@
     };
   })();
 
-  Orderly = function (el, options) {
+  Listcoach = function (el, options) {
     this.settings = $.extend({}, defaultOptions, options);
     this.$list = $(el).first();
     $doc = $(document);
@@ -52,7 +52,7 @@
     this.onDragEnd   = this.onDragEnd.bind(this, supports.touch);
   };
 
-  $.extend(Orderly.prototype, {
+  $.extend(Listcoach.prototype, {
 
     settings: null,
     itemHeight: 0,
@@ -207,15 +207,15 @@
     },
 
     on: function(eventName, callback) {
-      this.$list.on('orderly:' + eventName, callback);
+      this.$list.on('listcoach:' + eventName, callback);
     },
 
     off: function(eventName, callback) {
-      this.$list.off('orderly:' + eventName, callback);
+      this.$list.off('listcoach:' + eventName, callback);
     },
 
     trigger: function(eventName, args) {
-      this.$list.trigger('orderly:' + eventName, args);
+      this.$list.trigger('listcoach:' + eventName, args);
     },
 
     getItemCount: function() {
@@ -285,11 +285,11 @@
   }
 
   if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Orderly;
+    module.exports = Listcoach;
   } else {
     global = (function () {
       return this;
     }());
-    global.Orderly = Orderly;
+    global.Listcoach = Listcoach;
   }
 })();

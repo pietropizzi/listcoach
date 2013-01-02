@@ -1,11 +1,11 @@
 {
-  "name": "Orderly",
-  "version": "0.0.1",
-  "description": "Orderly is your smooth drag and drop list sorter",
+  "name": "Listcoach",
+  "version": "0.1.0",
+  "description": "Listcoach makes positioning your listitems a drag and drop breeze.",
   "author": "Peter Minarik",
   "repository": {
     "type": "git",
-    "url": "git@github.com:pietropizzi/orderly.git"
+    "url": "git@github.com:pietropizzi/listcoach.git"
   },
   "dependencies": {
     "connect": "=1.8.2"

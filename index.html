@@ -19,22 +19,22 @@
 			background-color: #eee;
 		}
 
-		#list .orderly-sorting-element {
+		#list .listcoach-sorting-element {
 			opacity: .7;
 		}
 	</style>
 </head>
 <body>
 	<script src="http://code.jquery.com/jquery-1.7.min.js"></script>
-	<script src="orderly.js"></script>
+	<script src="listcoach.js"></script>
 
 	<script>
 		$(function () {
-			var orderly = new Orderly($('#list'));
-			orderly.on('sortupdate', function(event, from, to) {
+			var listcoach = new Listcoach($('#list'));
+			listcoach.on('sortupdate', function(event, from, to) {
 				console.info('sorted from %o to %o', from, to);
 			});
-			orderly.enable();
+			listcoach.enable();
 		});
 	</script>
 

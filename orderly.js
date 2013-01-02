@@ -198,12 +198,26 @@
 
         clearTimeout(scrollTimeout);
 
+        this.trigger('sortupdate', [this.startIndex, this.currentIndex]);
+
         delete this.startX;
         delete this.startY;
         delete this.currentIndex;
         delete this.startIndex;
         delete this.$dragging;
       }.bind(this));
+    },
+
+    on: function(eventName, callback) {
+      this.$list.on('orderly:' + eventName, callback);
+    },
+
+    off: function(eventName, callback) {
+      this.$list.off('orderly:' + eventName, callback);
+    },
+
+    trigger: function(eventName, args) {
+      this.$list.trigger('orderly:' + eventName, args);
     },
 
     getItemCount: function() {

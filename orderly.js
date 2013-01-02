@@ -136,9 +136,8 @@
       indexDiff = Math.min(indexDiff, this.itemCount - this.startIndex - 1);
       newIndex = this.startIndex + indexDiff;
 
-      if (!this.scrolling) {
-        this.scroll(dx, dy);
-      }
+      clearTimeout(scrollTimeout);
+      this.scroll(dx, dy);
 
       // If the current index did not change return
       if (this.currentIndex === newIndex) {
@@ -183,8 +182,7 @@
       this.containerScroll += scrollBy;
       this.containerScroll = Math.min(this.containerScroll, $(document).height());
 
-      scrollTimeout = setTimeout(this.scroll.bind(this, dx, dy + scrollBy, true), 50);
-      this.move(dx, dy + scrollBy);
+      scrollTimeout = setTimeout(this.move.bind(this, dx, dy + scrollBy), 50);
     },
 
     end: function() {

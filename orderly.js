@@ -5,7 +5,9 @@
       $doc,
       defaultOptions = {
         itemSelector: 'li',
-        handleSelector: ''
+        handleSelector: '',
+        draggingElementClass: 'orderly-dragging-element',
+        draggingListClass: 'orderly-dragging-list'
       };
 
   supports = (function () {
@@ -245,8 +247,8 @@
       }.bind(this), 200);
     }
 
-    this.$dragging.toggleClass('orderly-sorting-element', toggle);
-    this.$list.toggleClass('orderly-sorting-list', toggle);
+    this.$dragging.toggleClass('.' + this.settings.draggingElementClass, toggle);
+    this.$list.toggleClass('.' + this.settings.draggingListClass, toggle);
 
     return transitionDeferred;
   }

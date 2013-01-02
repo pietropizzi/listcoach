@@ -32,7 +32,7 @@
 		$(function () {
 			var orderly = new Orderly($('#list'));
 			orderly.on('sortupdate', function(event, from, to) {
-				console.info('sorted to %o', from, to);
+				console.info('sorted from %o to %o', from, to);
 			});
 			orderly.enable();
 		});

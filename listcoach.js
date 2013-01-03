@@ -9,7 +9,8 @@
         handleSelector: '',
         draggingElementClass: 'listcoach-dragging-element',
         draggingListClass: 'listcoach-dragging-list',
-        scrollOffset: 50
+        zIndex: 1000,
+        scrollOffset: 50,
       };
 
   supports = (function () {
@@ -194,9 +195,9 @@
           this.$dragging[insertFunc](insertEl);
         }
 
-        clearTimeout(scrollTimeout);
-
         this.trigger('sortupdate', [this.startIndex, this.currentIndex]);
+
+        clearTimeout(scrollTimeout);
 
         delete this.startX;
         delete this.startY;
@@ -236,9 +237,9 @@
 
     getDraggingElement: function(event) {
       if (this.settings.handleSelector) {
-        return $(event.target).parent(this.settings.itemSelector);
+        return $(event.currentTarget).parent(this.settings.itemSelector);
       } else {
-        return $(event.target);
+        return $(event.currentTarget);
       }
     }
   });
@@ -252,7 +253,7 @@
       // Set transitions and starting position on all items
       this.$items.css(transitionProp, 'top .3s').css({position: 'relative', top: '0'});
       // No transition for draggin item
-      this.$dragging.css(transitionProp, '').css('z-index', 1);
+      this.$dragging.css(transitionProp, '').css('z-index', this.settings.zIndex);
       transitionDeferred.resolve();
     } else {
       resetTop = (this.currentIndex - this.startIndex) * this.itemHeight;
@@ -263,12 +264,14 @@
 
       setTimeout(function() {
         // Reset item styles
-        this.$items.css({
-          position: '',
-          top: '',
-          left: '',
-          'z-index': ''
-        });
+        this.$items
+          .css(transitionProp, '')
+          .css({
+            position: '',
+            top: '',
+            left: '',
+            'z-index': ''
+          });
         transitionDeferred.resolve();
       }.bind(this), 200);
     }

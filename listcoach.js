@@ -273,8 +273,8 @@
       }.bind(this), 200);
     }
 
-    this.$dragging.toggleClass('.' + this.settings.draggingElementClass, toggle);
-    this.$list.toggleClass('.' + this.settings.draggingListClass, toggle);
+    this.$dragging.toggleClass(this.settings.draggingElementClass, toggle);
+    this.$list.toggleClass(this.settings.draggingListClass, toggle);
 
     return transitionDeferred;
   }

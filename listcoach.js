@@ -183,7 +183,7 @@
       this.containerScroll += scrollBy;
       this.containerScroll = Math.min(this.containerScroll, $(document).height());
 
-      scrollTimeout = setTimeout(this.move.bind(this, dx, dy + scrollBy), 50);
+      scrollTimeout = setTimeout(this.move.bind(this, dx, dy + scrollBy), 25);
     },
 
     end: function() {

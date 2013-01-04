@@ -60,6 +60,7 @@
     itemCount: 0,
     scrolling: false,
 
+    $doc: null,
     $list: null,
     $items: null,
 
@@ -181,7 +182,7 @@
       this.scrolling = true;
       window.scrollBy(0, scrollBy);
       this.containerScroll += scrollBy;
-      this.containerScroll = Math.min(this.containerScroll, $(document).height());
+      this.containerScroll = Math.min(this.containerScroll, $doc.height());
 
       scrollTimeout = setTimeout(this.move.bind(this, dx, dy + scrollBy), 25);
     },

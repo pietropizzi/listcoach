@@ -60,14 +60,13 @@
     itemCount: 0,
     scrolling: false,
 
-    $doc: null,
     $list: null,
     $items: null,
 
     enable: function() {
       toggleStartListeners.call(this, true);
 
-      this.$items = this.getItems().css('top', '0');
+      this.$items = this.getItems().css('-webkit-transform', 'translate3d(0,0,0)');
       this.itemCount = this.getItemCount();
       this.itemHeight = this.getItemHeight();
     },
@@ -128,10 +127,7 @@
       var indexDiff, newIndex;
 
       // Move dragged object
-      this.$dragging.css({
-        top: dy,
-        left: dx
-      });
+      this.$dragging.css('-webkit-transform', 'translate(' + dx + 'px, ' + dy + 'px)');
 
       indexDiff = Math.round(dy / this.itemHeight);
       indexDiff = Math.max(indexDiff, -this.startIndex);
@@ -162,7 +158,7 @@
           top = -this.itemHeight;
         }
 
-        $(item).css('top', top);
+        $(item).css('-webkit-transform', 'translateY(' + top + 'px)');
       }.bind(this));
     },
 
@@ -182,7 +178,7 @@
       this.scrolling = true;
       window.scrollBy(0, scrollBy);
       this.containerScroll += scrollBy;
-      this.containerScroll = Math.min(this.containerScroll, $doc.height());
+      this.containerScroll = Math.min(this.containerScroll, $(document).height());
 
       scrollTimeout = setTimeout(this.move.bind(this, dx, dy + scrollBy), 25);
     },
@@ -192,6 +188,7 @@
           insertEl = this.$items.eq(this.currentIndex);
 
       toggleSortingStyles.call(this, false).done(function() {
+
         if (this.currentIndex !== this.startIndex) {
           this.$dragging[insertFunc](insertEl);
         }
@@ -252,7 +249,7 @@
 
     if (toggle) {
       // Set transitions and starting position on all items
-      this.$items.css(transitionProp, 'top .3s').css({position: 'relative', top: '0'});
+      this.$items.css(transitionProp, '-webkit-transform .3s').css('-webkit-transform', 'translate(0,0)');
       // No transition for draggin item
       this.$dragging.css(transitionProp, '').css('z-index', this.settings.zIndex);
       transitionDeferred.resolve();
@@ -261,18 +258,14 @@
       // No transition for all items
       this.$items.css(transitionProp, '');
       // Transition for draging item
-      this.$dragging.css(transitionProp, 'top .2s, left .2s').css({top: resetTop, left: '0'});
+      this.$dragging.css(transitionProp, '-webkit-transform .2s').css('-webkit-transform', 'translate(0, ' + resetTop +'px)');
 
       setTimeout(function() {
         // Reset item styles
         this.$items
           .css(transitionProp, '')
-          .css({
-            position: '',
-            top: '',
-            left: '',
-            'z-index': ''
-          });
+          .css('-webkit-transform', '')
+          .css('z-index', '');
         transitionDeferred.resolve();
       }.bind(this), 200);
     }

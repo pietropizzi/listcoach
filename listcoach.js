@@ -3,7 +3,11 @@
       global,
       supports,
       scrollTimeout,
+      getStyleProperty,
       $doc,
+
+      browserPrefixes = ['', 'Webkit', 'Moz', 'O', 'ms'],
+
       defaultOptions = {
         itemSelector: 'li',
         handleSelector: '',
@@ -13,35 +17,37 @@
         scrollOffset: 50,
       };
 
-  supports = (function () {
-    return {
-      touch: (function() {
-        try {
-          return window.hasOwnProperty('ontouchstart');
-        } catch (e) {
-          return false;
-        }
-      })(),
+  getStyleProperty = function(property) {
+    var style = document.createElement('listcoach').style,
+        titleCaseProperty = property.charAt(0).toUpperCase() + property.slice(1),
+        result;
 
-      transitionProperty: (function() {
-        var style = document.createElement('listcoach').style,
-            transitionProps = ['transition', 'WebkitTransition', 'MozTransition', 'OTransition', 'msTransition'],
-            transition;
+    for ( var i in browserPrefixes ) {
+      var prefix = browserPrefixes[i],
+          prop = prefix ? prefix + titleCaseProperty : property;
 
-        for ( var i in transitionProps ) {
-          var prop = transitionProps[i];
-          if ( style[prop] !== undefined ) {
-            transition = prop.split('Transition');
-            transition = transition.length === 1 ?
-                transition[0] :
-                '-' + transition[0].charAt(0).toLowerCase() + transition[0].slice(1) + '-transition';
-          }
-        }
+      if ( style[prop] !== undefined ) {
+        result = prop.split(titleCaseProperty);
+        result = result.length === 1 ?
+            result[0] : '-' + result[0].toLowerCase() + '-' + property;
+      }
+    }
+    return result;
+  };
 
-        return transition;
-      })()
-    };
-  })();
+  supports = {
+    touch: (function() {
+      try {
+        return window.hasOwnProperty('ontouchstart');
+      } catch (e) {
+        return false;
+      }
+    })(),
+
+    transitionProperty: getStyleProperty('transition'),
+
+    transformProperty: getStyleProperty('transform')
+  };
 
   Listcoach = function (el, options) {
     this.settings = $.extend({}, defaultOptions, options);
@@ -66,7 +72,7 @@
     enable: function() {
       toggleStartListeners.call(this, true);
 
-      this.$items = this.getItems().css('-webkit-transform', 'translate3d(0,0,0)');
+      this.$items = this.getItems().css(supports.transformProperty, 'translate3d(0,0,0)');
       this.itemCount = this.getItemCount();
       this.itemHeight = this.getItemHeight();
     },
@@ -124,10 +130,11 @@
     },
 
     move: function(dx, dy) {
-      var indexDiff, newIndex;
+      var transformProp = supports.transformProperty,
+          indexDiff, newIndex;
 
       // Move dragged object
-      this.$dragging.css('-webkit-transform', 'translate(' + dx + 'px, ' + dy + 'px)');
+      this.$dragging.css(transformProp, 'translate3d(' + dx + 'px, ' + dy + 'px, 0)');
 
       indexDiff = Math.round(dy / this.itemHeight);
       indexDiff = Math.max(indexDiff, -this.startIndex);
@@ -158,7 +165,7 @@
           top = -this.itemHeight;
         }
 
-        $(item).css('-webkit-transform', 'translateY(' + top + 'px)');
+        $(item).css(transformProp, 'translate3d(0, ' + top + 'px, 0)');
       }.bind(this));
     },
 
@@ -244,12 +251,13 @@
 
   function toggleSortingStyles (toggle) {
     var transitionProp = supports.transitionProperty,
+        transformProp = supports.transformProperty,
         transitionDeferred = $.Deferred(),
         resetTop;
 
     if (toggle) {
       // Set transitions and starting position on all items
-      this.$items.css(transitionProp, '-webkit-transform .3s').css('-webkit-transform', 'translate(0,0)');
+      this.$items.css(transitionProp, transformProp + ' .3s').css(transformProp, 'translate3d(0,0,0)');
       // No transition for draggin item
       this.$dragging.css(transitionProp, '').css('z-index', this.settings.zIndex);
       transitionDeferred.resolve();
@@ -258,13 +266,13 @@
       // No transition for all items
       this.$items.css(transitionProp, '');
       // Transition for draging item
-      this.$dragging.css(transitionProp, '-webkit-transform .2s').css('-webkit-transform', 'translate(0, ' + resetTop +'px)');
+      this.$dragging.css(transitionProp, transformProp + ' .2s').css(transformProp, 'translate3d(0, ' + resetTop +'px, 0)');
 
       setTimeout(function() {
         // Reset item styles
         this.$items
           .css(transitionProp, '')
-          .css('-webkit-transform', '')
+          .css(transformProp, '')
           .css('z-index', '');
         transitionDeferred.resolve();
       }.bind(this), 200);

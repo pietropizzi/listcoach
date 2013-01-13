@@ -72,7 +72,7 @@
     enable: function() {
       toggleStartListeners.call(this, true);
 
-      this.$items = this.getItems().css(supports.transformProperty, 'translate3d(0,0,0)');
+      this.$items = this.getItems();
       this.itemCount = this.getItemCount();
       this.itemHeight = this.getItemHeight();
     },
@@ -131,15 +131,15 @@
 
     move: function(dx, dy) {
       var transformProp = supports.transformProperty,
-          indexDiff, newIndex;
+          totalIndexDiff, currentDiff, newIndex, top, elements, i;
 
       // Move dragged object
       this.$dragging.css(transformProp, 'translate3d(' + dx + 'px, ' + dy + 'px, 0)');
 
-      indexDiff = Math.round(dy / this.itemHeight);
-      indexDiff = Math.max(indexDiff, -this.startIndex);
-      indexDiff = Math.min(indexDiff, this.itemCount - this.startIndex - 1);
-      newIndex = this.startIndex + indexDiff;
+      totalIndexDiff = Math.round(dy / this.itemHeight);
+      totalIndexDiff = Math.max(totalIndexDiff, -this.startIndex);
+      totalIndexDiff = Math.min(totalIndexDiff, this.itemCount - this.startIndex - 1);
+      newIndex = this.startIndex + totalIndexDiff;
 
       clearTimeout(scrollTimeout);
       this.scroll(dx, dy);
@@ -149,24 +149,40 @@
         return;
       }
 
-      this.currentIndex = newIndex;
+      currentDiff = newIndex - this.currentIndex;
 
-      this.$items.each(function(i, item) {
-        var top = '0';
-
-        // If this item is the dragged one we don't need to do anything
-        if (i === this.startIndex) {
-          return;
-        }
-
-        if (i < this.startIndex && i >= newIndex) {
-          top = this.itemHeight;
-        } else if (i > this.startIndex && i <= newIndex) {
+      if (currentDiff > 0) {
+        if (newIndex > this.startIndex) {
+          elements = this.$items.eq(newIndex);
           top = -this.itemHeight;
+          for (i = 1; i < currentDiff; i++) {
+            elements = elements.add(this.$items.eq(newIndex - i));
+          }
+        } else if (newIndex <= this.startIndex) {
+          elements = this.$items.eq(this.currentIndex);
+          top = 0;
+          for (i = 1; i < currentDiff; i++) {
+            elements = elements.add(this.$items.eq(this.currentIndex - i));
+          }
         }
+      } else if (currentDiff < 0) {
+        if (newIndex < this.startIndex) {
+          elements = this.$items.eq(newIndex);
+          top = this.itemHeight;
+          for (i = -1; i > currentDiff; i--) {
+            elements = elements.add(this.$items.eq(newIndex + i));
+          }
+        } else if (newIndex >= this.startIndex) {
+          elements = this.$items.eq(this.currentIndex);
+          top = 0;
+          for (i = -1; i > currentDiff; i--) {
+            elements = elements.add(this.$items.eq(this.currentIndex + i));
+          }
+        }
+      }
 
-        $(item).css(transformProp, 'translate3d(0, ' + top + 'px, 0)');
-      }.bind(this));
+      this.currentIndex = newIndex;
+      elements.css(transformProp, 'translate3d(0, ' + top + 'px, 0)');
     },
 
     scroll: function(dx, dy) {
